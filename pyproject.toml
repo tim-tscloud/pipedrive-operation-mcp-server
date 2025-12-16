@@ -1,0 +1,8 @@
+[project]
+name = "chatgpt-pd-operation"
+version = "0.1.0"
+description = "A MCP server that allows user to do CRUD to Pipedrive"
+requires-python = ">=3.12"
+dependencies = [
+    "fastmcp>=2.13.0.2",
+]
