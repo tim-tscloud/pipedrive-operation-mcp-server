@@ -6,6 +6,7 @@ import asyncio
 
 PIPEDRIVE_TOKEN = "b8928b87616ec392587b44268757fa8b9353a95b"
 PIPEDRIVE_BASE = "https://api.pipedrive.com/api/v2"
+PIPEDRIVE_DOMAIN = "tscloudwork"
 
 mcp = FastMCP("chatgpt-pd-operation")
 
@@ -363,12 +364,16 @@ def add_pipedrive_deal(
     }
     
     res = requests.post(f"{PIPEDRIVE_BASE}/deals", json=payload, headers=headers)
+    
 
     try:
         res.raise_for_status()
         result = res.json()
+
+        deal_id = result["data"]["id"]
         
         # 添加額外資訊
+        result["deal_url"] = f"https://{PIPEDRIVE_DOMAIN}.pipedrive.com/deal/{deal_id}"
         result["created_organization"] = org_name if org_name and org_id else None
         result["created_person"] = person_name if person_name and person_id else None
         
