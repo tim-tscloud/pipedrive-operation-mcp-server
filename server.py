@@ -10,9 +10,9 @@ PIPEDRIVE_DOMAIN = "tscloudwork"
 
 mcp = FastMCP("chatgpt-pd-operation")
 
-# ===== 輔助函式 =====
+# ===== 核心邏輯，負責和 Pipedrive API 溝通，可以在任何地方被呼叫 =====
 
-def search_pipedrive_person(name: str = None, email: str = None) -> Optional[Dict[str, Any]]: # type: ignore
+def _logic_search_pipedrive_person(name: str = None, email: str = None) -> Optional[Dict[str, Any]]: # type: ignore
     """
     搜尋 Pipedrive 中是否存在指定名稱或 email 的聯絡人
     優先使用 email 搜尋（更精確），若無則使用名稱
@@ -58,7 +58,8 @@ def search_pipedrive_person(name: str = None, email: str = None) -> Optional[Dic
         print(f"搜尋聯絡人時發生錯誤: {e}")
         return None
 
-def search_pipedrive_organization(name: str, tax_id: str) -> Optional[Dict[str, Any]]:
+
+def _logic_search_pipedrive_organization(name: str, tax_id: str) -> Optional[Dict[str, Any]]:
     """
     搜尋 Pipedrive 中是否存在指定名稱或統一編號的組織
     優先使用統一編號搜尋（更精確），若無則使用名稱
@@ -103,7 +104,7 @@ def search_pipedrive_organization(name: str, tax_id: str) -> Optional[Dict[str, 
         print(f"搜尋組織時發生錯誤: {e}")
         return None
 
-def create_pipedrive_person(
+def _logic_create_pipedrive_person(
     name: str,
     emails: Optional[List[str]] = None,
     phones: Optional[List[str]] = None,
@@ -164,7 +165,7 @@ def create_pipedrive_person(
             "response": res.text
         }
 
-def create_pipedrive_organization(
+def _logic_create_pipedrive_organization(
     name: str,
     tax_id: Optional[str] = None,
     owner_id: Optional[int] = None,
@@ -216,7 +217,7 @@ def create_pipedrive_organization(
             "response": res.text
         }
 
-def get_or_create_person(
+def _logic_get_or_create_person(
     person_name: str,
     person_email: Optional[str] = None,
     person_phone: Optional[str] = None,
@@ -238,7 +239,7 @@ def get_or_create_person(
     emails = [person_email] if person_email else None
     phones = [person_phone] if person_phone else None
     
-    new_person = create_pipedrive_person(
+    new_person = _logic_create_pipedrive_person(
         name=person_name,
         emails=emails,
         phones=phones,
@@ -253,7 +254,7 @@ def get_or_create_person(
     
     return None
 
-def get_or_create_organization(
+def _logic_get_or_create_organization(
     org_name: str,
     org_tax_id: Optional[str] = None,
     org_address: Optional[str] = None
@@ -271,7 +272,7 @@ def get_or_create_organization(
     
     # 不存在則建立新組織
     print(f"建立新組織: {org_name}")
-    new_org = create_pipedrive_organization(
+    new_org = _logic_create_pipedrive_organization(
         name=org_name,
         address=org_address
     )
@@ -328,7 +329,7 @@ def add_pipedrive_deal(
     # 處理組織
     org_id = None
     if org_name:
-        org_id = get_or_create_organization(org_name, org_tax_id, org_address)
+        org_id = _logic_get_or_create_organization(org_name, org_tax_id, org_address)
         if org_id is None:
             return {
                 "error": f"無法取得或建立組織: {org_name}",
@@ -338,7 +339,7 @@ def add_pipedrive_deal(
     # 處理聯絡人（如果有組織，將聯絡人關聯到組織）
     person_id = None
     if person_name:
-        person_id = get_or_create_person(
+        person_id = _logic_get_or_create_person(
             person_name=person_name,
             person_email=person_email,
             person_phone=person_phone,
