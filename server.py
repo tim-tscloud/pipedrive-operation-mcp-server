@@ -264,7 +264,7 @@ def _logic_get_or_create_organization(
     優先使用統一編號搜尋，確保不會重複建立相同統編的組織
     """
     # 先搜尋是否存在
-    existing_org = _logic_create_pipedrive_organization(org_name, org_tax_id) # type: ignore
+    existing_org = _logic_search_pipedrive_organization(org_name, org_tax_id) # type: ignore
     
     if existing_org:
         print(f"找到現有組織: {existing_org.get('name')} (ID: {existing_org.get('id')})")
